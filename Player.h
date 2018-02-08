@@ -19,6 +19,6 @@ public:
 	bool IsInJail() const;
 	bool FailedMaxJailRolls() const;
 	void FailJailRoll();
-}
+};
 
 #endif

@@ -1,6 +1,6 @@
 class GameBoard{
 public:
-	enum TILE{
+	enum Tile{
 		GO,
 		MEDITERANEAN_AVENUE,
 		COMMUNITY_CHEST_1,
@@ -42,54 +42,13 @@ public:
 		LUXURY_TAX,
 		BOARDWALK,
 
-		NUM_TILES,
-
 		IN_JAIL,
-	}
-	static const char** tile_name = {
-		"GO",
-		"Mediteranean Avenue",
-		"Community Chest 1",
-		"Baltic Avenue",
-		"Income Tax",
-		"Reading Railroad",
-		"Oriental Avenue",
-		"Chance 1",
-		"Vermont Avenue",
-		"Connecticut Avenue",
-		"Just Visiting",
-		"St. Charles Place",
-		"Electric Company",
-		"States Avenue",
-		"Virginia Avenue",
-		"Pensylvania Railroad",
-		"St. James Place",
-		"Community Chest 2",
-		"Tennessee Avenue",
-		"Ney York Avenue",
-		"Free Parking",
-		"Kentucky Avenue",
-		"Chance 2",
-		"Indiana Avenue",
-		"Illinois Avenue",
-		"B. & O. Railroad",
-		"Atlantic Avenue",
-		"Ventnor Avenue",
-		"Water Works",
-		"Marvin Gardens",
-		"GO TO JAIL",
-		"Pacific Avenue",
-		"North Carolina Avenue",
-		"Community Chest 3",
-		"Pensylvania Avenue",
-		"Short Line",
-		"Chance 3",
-		"Park Place",
-		"Luxury Tax",
-		"Boardwalk";
-		"Number of tiles",
-		"In Jail",
+
+		NUM_TILES = 40,
+		REAL_NUM_TILES = 41,
 	};
+
+	static const char* tile_name[REAL_NUM_TILES];
 	
 	static const char* GetTileName(int position);
 	static Tile GetNearestRailroad(int position);

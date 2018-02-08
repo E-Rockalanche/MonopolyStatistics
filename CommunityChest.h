@@ -2,6 +2,7 @@
 #define COMMUNITY_CHEST_CARDS_H
 
 class CommunityChest{
+public:
 	enum Card{
 		ADVANCE_TO_GO,
 		BANK_ERROR_IN_YOUR_FAVOR,
@@ -23,6 +24,9 @@ class CommunityChest{
 
 		NUM_CARDS,
 	};
+	static const char* GetCardName(Card card);
+private:
+	static const char* card_name[NUM_CARDS];
 };
 
 #endif

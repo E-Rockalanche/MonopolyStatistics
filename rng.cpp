@@ -1,5 +1,8 @@
 #include "rng.h"
+#include <string>
+#include <iostream>
 #include <ctime>
+using namespace std;
 
 #define ROT_RNG(x,y) (((x) << (y)) | ((x) >> (32 - (y))))
 #define CLAMP_RNG(x, low, high) ((x) < (low) ? (low) : ((x) > (high) ? (high) : (x)))
@@ -11,6 +14,9 @@
 0x19950801
 0xDEADDEAD
 */
+
+//#define dout(N) cout << "Debug: " << __FILE__ << " (" << __LINE__ << "): " << N << '\n'
+#define dout(N)
 
 //private:
 
@@ -37,6 +43,7 @@ RNG::RNG(uint s){
 
 //initializes state with new seed
 void RNG::SetSeed(uint s){
+	dout("SetSeed(" << s << ")");
 	seed = s;
 	if (seed == 0){
 		seed = (unsigned long) time(NULL) - 1352700000;
@@ -44,7 +51,7 @@ void RNG::SetSeed(uint s){
 	a = MAGIC_NUMBER_RNG;
 	b = c = d = seed;
 	for(int i = 0; i < 20; ++i){
-		(void) Value();
+		Value();
 	}
 }
 
@@ -73,11 +80,8 @@ float RNG::RandomRange(float low, float high){
 }
 
 //returns a value in range [0, n-1]
-int RNG::IRandom(int n){
-	if (n < 0){
-		return 0;
-	}
-
+uint RNG::IRandom(uint n){
+	dout("IRandom(" << n << ")");
 	uint div = RANDOM_MAX_RNG / n;
 	uint r;
 
@@ -98,12 +102,12 @@ int RNG::IRandomRange(int low, int high){
 
 //returns if percent chance succeeded
 bool RNG::Chance(float percent){
-	return (Random(100.0) < CLAMP(percent, 0.0, 100.0));
+	return (Random(100.0) < CLAMP_RNG(percent, 0.0, 100.0));
 }
 
 //returns if percent chance succeeded
 bool RNG::Chance(int percent){
-	return (IRandom(100) < CLAMP(percent, 0, 100));
+	return ((int)IRandom(100) < CLAMP_RNG(percent, 0, 100));
 }
 
 //return current seed

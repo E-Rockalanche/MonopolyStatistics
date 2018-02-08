@@ -3,8 +3,8 @@
 
 void Player::Reset(){
 	position = GameBoard::GO;
-	has_get_out_of_jail_free_chance_card = false;
-	has_get_out_of_jail_free_community_chest_card = false;
+	has_gojf_chance_card = false;
+	has_gojf_community_chest_card = false;
 }
 
 void Player::SetPosition(int new_pos){
@@ -21,7 +21,7 @@ void Player::Move(int amount){
 }
 
 bool Player::HasGetOutOfJailFreeCard() const{
-	return (has_get_out_of_jail_free_chance_card || has_get_out_of_jail_free_community_chest_card);
+	return (has_gojf_chance_card || has_gojf_community_chest_card);
 }
 
 void Player::GoToJail(){

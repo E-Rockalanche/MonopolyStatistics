@@ -1,6 +1,8 @@
 #ifndef RNG_H_ERIC_ROBERTS
 #define RNG_H_ERIC_ROBERTS
 
+typedef unsigned int uint;
+
 class RNG{
 private:
 	uint a;
@@ -31,7 +33,7 @@ public:
 	bool Chance(float percent);
 
 	//return value in range [0, n-1]
-	int IRandom(int n);
+	uint IRandom(uint n);
 	//return value in range [low, high]
 	int IRandomRange(int low, int high);
 	//return if percent chance succeeded

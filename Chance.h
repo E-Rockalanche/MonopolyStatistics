@@ -2,6 +2,7 @@
 #define CHANCE_CARDS_H
 
 class Chance{
+public:
 	enum Card{
 		ADVANCE_TO_GO,
 		ADVANCE_TO_ILLINOIS_AVE,
@@ -22,6 +23,9 @@ class Chance{
 
 		NUM_CARDS,
 	};
+	static const char* GetCardName(Card card);
+private:
+	static const char* card_name[NUM_CARDS];
 };
 
 #endif
