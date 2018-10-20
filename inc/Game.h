@@ -30,7 +30,8 @@ private:
 	unsigned int print_delay = 0;
 	const char* log_filename = "MonopolyStats.log";
 
-	Statistics stats;
+	Statistics tile_stats;
+	Statistics group_stats;
 
 	void Reset();
 	void PerformTurn(Player& player);

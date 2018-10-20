@@ -1,37 +1,24 @@
-CC = g++ -Wall -Wextra -c -std=c++11
+TARGET := MonopolyStats.exe
 
-MonopolyStats:	main.o Game.o Statistics.o GameBoard.o Player.o Dice.o Chance.o CommunityChest.o Logger.o rng.o
-	g++ -static main.o Game.o Statistics.o GameBoard.o Player.o Dice.o Chance.o CommunityChest.o Logger.o rng.o -o MonopolyStats.exe
+SRCDIR := ./src
+INCDIR := ./inc
+OBJDIR := ./obj
 
-main.o:	main.cpp
-	$(CC) main.cpp -o main.o
+CXX := g++
+CFLAGS := -Wall -Wextra -std=c++11 
+LFLAGS := -static
 
-Game.o:	Game.cpp
-	$(CC) Game.cpp -o Game.o
+MAKE_OBJ = $(CXX) -c $(CFLAGS) $< -o $@ -I$(INCDIR)
+MAKE_EXE = $(CXX) $(LFLAGS) $^ -o $@
 
-Statistics.o:	Statistics.cpp
-	$(CC) Statistics.cpp -o Statistics.o
+SOURCES := $(wildcard $(SRCDIR)/*.cpp)
+OBJECTS := $(patsubst $(SRCDIR)/%.cpp, $(OBJDIR)/%.o, $(SOURCES))
 
-Player.o:	Player.cpp
-	$(CC) Player.cpp -o Player.o
+$(TARGET):	$(OBJECTS)
+	$(MAKE_EXE)
 
-GameBoard.o:	GameBoard.cpp
-	$(CC) GameBoard.cpp -o GameBoard.o
-
-Dice.o:	Dice.cpp
-	$(CC) Dice.cpp -o Dice.o
-
-Chance.o: Chance.cpp
-	$(CC) Chance.cpp -o Chance.o
-
-CommunityChest.o: CommunityChest.cpp
-	$(CC) CommunityChest.cpp -o CommunityChest.o
-
-Logger.o:	Logger.cpp
-	$(CC) Logger.cpp -o Logger.o
-
-rng.o:	rng.cpp
-	$(CC) rng.cpp -o rng.o
+$(OBJDIR)/%.o: $(SRCDIR)/%.cpp
+	$(MAKE_OBJ)
 
 clean:
-	del *.o
+	del $(OBJDIR)/%.o

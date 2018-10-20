@@ -63,7 +63,8 @@ void Game::Reset(){
 		player_list[i].Reset();
 	}
 
-	stats.Reset(GameBoard::REAL_NUM_TILES);
+	tile_stats.Reset(GameBoard::REAL_NUM_TILES);
+	group_stats.Reset(GameBoard::NUM_TILE_GROUPS);
 }
 
 void Game::PerformTurn(Player& player){
@@ -115,7 +116,11 @@ void Game::PerformTurn(Player& player){
 		player.Move(roll);
 		Print("\tMoved " + to_string(roll) + string(" spaces. Landed on ") + GameBoard::GetTileName(player.GetPosition()));
 
-		stats.Count(player.GetPosition());
+		int player_pos = player.GetPosition();
+
+		tile_stats.Count(player_pos);
+		group_stats.Count(GameBoard::GetTileGroup(player_pos));
+
 		PerformTileEffect(player);
 	}while(dice.WasDoubles() && !player.IsInJail());
 }
@@ -125,7 +130,8 @@ void Game::PerformTileEffect(Player& player){
 		case GameBoard::GO_TO_JAIL:
 			Print("\tGoing to jail");
 			player.GoToJail();
-			stats.Count(player.GetPosition());
+			tile_stats.Count(GameBoard::GO_TO_JAIL);
+			group_stats.Count(GameBoard::GetTileGroup(GameBoard::GO_TO_JAIL));
 			return;
 
 		case GameBoard::CHANCE_1:
@@ -149,67 +155,72 @@ void Game::PerformChanceCardEffect(Chance::Card card, Player& player){
 	int old_position = player.GetPosition();
 	Print(string("\t") + Chance::GetCardName(card));
 
+	bool count_position = true;
+	bool discard = true;
+
 	switch(card){
 		case Chance::ADVANCE_TO_GO:
 			player.SetPosition(GameBoard::GO);
-			stats.Count(player.GetPosition());
 			break;
 
 		case Chance::ADVANCE_TO_ILLINOIS_AVE:
 			player.SetPosition(GameBoard::ILLINOIS_AVENUE);
-			stats.Count(player.GetPosition());
 			break;
 
 		case Chance::ADVANCE_TO_ST_CHARLES_PLACE:
 			player.SetPosition(GameBoard::ST_CHARLES_PLACE);
-			stats.Count(player.GetPosition());
 			break;
 
 		case Chance::ADVANCE_TOKEN_TO_NEAREST_UTILITY:
 			player.SetPosition(GameBoard::GetNearestUtility(player.GetPosition()));
 			Print(string("Landed on ") + GameBoard::GetTileName(player.GetPosition()));
-			stats.Count(player.GetPosition());
 			break;
 
 		case Chance::ADVANCE_TOKEN_TO_NEAREST_RAILROAD:
 			player.SetPosition(GameBoard::GetNearestRailroad(player.GetPosition()));
 			Print(string("Landed on ") + GameBoard::GetTileName(player.GetPosition()));
-			stats.Count(player.GetPosition());
 			break;
 
 		case Chance::GET_OUT_OF_JAIL_FREE:
 			player.has_gojf_chance_card = true;
-			//return so that card is not immediately put into discard pile
-			return;
+			count_position = false;
+			discard = false;
+			break;
 
 		case Chance::GO_BACK_3_SPACES:
 			player.Move(-3);
 			Print(string("Landed on ") + GameBoard::GetTileName(player.GetPosition()));
-			stats.Count(player.GetPosition());
 			break;
 
 		case Chance::GO_TO_JAIL:
 			player.GoToJail();
-			stats.Count(player.GetPosition());
 			break;
 
 		case Chance::TAKE_A_TRIP_TO_READING_RAILROAD:
 			player.SetPosition(GameBoard::READING_RAILROAD);
-			stats.Count(player.GetPosition());
 			break;
 
 		case Chance::TAKE_A_WALK_ON_THE_BOARDWALK:
 			player.SetPosition(GameBoard::BOARDWALK);
-			stats.Count(player.GetPosition());
 			break;
 
 		default:
+			count_position = false;
 			break;
 	}
 
-	chance_cards.Discard(card);
+	int player_pos = player.GetPosition();
 
-	if (player.GetPosition() != old_position){
+	if (count_position) {
+		tile_stats.Count(player_pos);
+		group_stats.Count(GameBoard::GetTileGroup(player_pos));
+	}
+
+	if (discard) {
+		chance_cards.Discard(card);
+	}
+
+	if (player_pos != old_position){
 			PerformTileEffect(player);
 	}
 }
@@ -218,29 +229,42 @@ void Game::PerformCommunityChestCardEffect(CommunityChest::Card card, Player& pl
 	int old_position = player.GetPosition();
 	Print(string("\t") + CommunityChest::GetCardName(card));
 
+	bool count_position = false;
+	bool discard = true;
+
 	switch(card){
 		case CommunityChest::ADVANCE_TO_GO:
 			player.SetPosition(GameBoard::GO);
-			stats.Count(player.GetPosition());
+			count_position = true;
 			break;
 
 		case CommunityChest::GET_OUT_OF_JAIL_FREE:
 			player.has_gojf_community_chest_card = true;
-			//return so that card is not immediately put into discard pile
-			return;
+			discard = false;
+			break;
 
 		case CommunityChest::GO_TO_JAIL:
 			player.GoToJail();
-			stats.Count(player.GetPosition());
+			count_position = true;
 			break;
 
 		default:
 			break;
 	}
-	community_chest_cards.Discard(card);
 
-	if (player.GetPosition() != old_position){
-			PerformTileEffect(player);
+	int player_pos = player.GetPosition();
+
+	if(count_position) {
+		tile_stats.Count(player_pos);
+		group_stats.Count(GameBoard::GetTileGroup(player_pos));
+	}
+
+	if (discard) {
+		community_chest_cards.Discard(card);
+	}
+
+	if (player_pos != old_position){
+		PerformTileEffect(player);
 	}
 }
 	
@@ -249,15 +273,27 @@ void Game::SetConsoleOutput(bool output){
 }
 
 void Game::DisplayStats() const{
+	double tile_total = tile_stats.TotalCount();
+	double group_total = group_stats.TotalCount();
+
+	vector<Statistics::Tuple> tile_array = tile_stats.GetSortedTupleVector();
+	vector<Statistics::Tuple> group_array = group_stats.GetSortedTupleVector();
+
 	cout << "\n===========STATS===========\n";
-	double total = stats.TotalCount();
-	vector<Statistics::Tuple> sorted_array = stats.GetSortedTupleVector();
-	float percent;
-	for(unsigned int i = 0; i < sorted_array.size(); i++){
-		percent = (double)(sorted_array[i].count*100) / total;
-		cout << GameBoard::GetTileName(sorted_array[i].index) << ": " << percent << "\%\n";
+
+	cout << "\nTile groups:\n";
+	for(unsigned int i = 0; i < group_array.size(); i++){
+		float percent = 100.0 * group_array[i].count / group_total;
+		cout << '\t' << GameBoard::GetTileGroupName(group_array[i].index) << ": " << percent << "%\n";
 	}
-	cout << "===========================\n\n";
+
+	cout << "\nIndividual tiles:\n";
+	for(unsigned int i = 0; i < tile_array.size(); i++){
+		float percent = 100.0 * tile_array[i].count / tile_total;
+		cout << '\t' << GameBoard::GetTileName(tile_array[i].index) << ": " << percent << "%\n";
+	}
+
+	cout << "\n===========================\n\n";
 }
 	
 void Game::SetLogging(bool do_logging){

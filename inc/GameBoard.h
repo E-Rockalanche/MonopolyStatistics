@@ -48,9 +48,33 @@ public:
 		REAL_NUM_TILES = 41,
 	};
 
+	enum TileGroup {
+		OTHER,
+		CHANCE,
+		COMMUNITY_CHEST,
+
+		BROWN,
+		L_BLUE,
+		PINK,
+		ORANGE,
+		RED,
+		YELLOW,
+		GREEN,
+		BLUE,
+
+		RAILROAD,
+		UTILITY,
+
+		NUM_TILE_GROUPS
+	};
+
 	static const char* tile_name[REAL_NUM_TILES];
+	static const int tile_groups[REAL_NUM_TILES];
+	static const char* tile_group_names[NUM_TILE_GROUPS];
 	
 	static const char* GetTileName(int position);
 	static Tile GetNearestRailroad(int position);
 	static Tile GetNearestUtility(int position);
+	static int GetTileGroup(int position);
+	static const char* GetTileGroupName(int index);
 };
