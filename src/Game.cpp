@@ -113,15 +113,17 @@ void Game::PerformTurn(Player& player){
 			}
 		}
 
-		player.Move(roll);
-		Print("\tMoved " + to_string(roll) + string(" spaces. Landed on ") + GameBoard::GetTileName(player.GetPosition()));
+		if (!player.IsInJail()) {
+			player.Move(roll);
+			Print("\tMoved " + to_string(roll) + string(" spaces. Landed on ") + GameBoard::GetTileName(player.GetPosition()));
 
-		int player_pos = player.GetPosition();
+			int player_pos = player.GetPosition();
 
-		tile_stats.Count(player_pos);
-		group_stats.Count(GameBoard::GetTileGroup(player_pos));
+			tile_stats.Count(player_pos);
+			group_stats.Count(GameBoard::GetTileGroup(player_pos));
 
-		PerformTileEffect(player);
+			PerformTileEffect(player);
+		}
 	}while(dice.WasDoubles() && !player.IsInJail());
 }
 
@@ -130,8 +132,8 @@ void Game::PerformTileEffect(Player& player){
 		case GameBoard::GO_TO_JAIL:
 			Print("\tGoing to jail");
 			player.GoToJail();
-			tile_stats.Count(GameBoard::GO_TO_JAIL);
-			group_stats.Count(GameBoard::GetTileGroup(GameBoard::GO_TO_JAIL));
+			tile_stats.Count(GameBoard::IN_JAIL);
+			group_stats.Count(GameBoard::GetTileGroup(GameBoard::IN_JAIL));
 			return;
 
 		case GameBoard::CHANCE_1:
